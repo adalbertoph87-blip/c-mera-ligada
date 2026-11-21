@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Não saia dessa página</title>
+<meta name="description" content="Conteúdo exclusivo +18. Acesso restrito a maiores de idade." />
+<meta name="robots" content="noindex,nofollow" />
+<meta property="og:title" content="Não saia dessa página — Conteúdo +18" />
+<meta property="og:description" content="Conteúdo exclusivo +18. Acesso restrito a maiores de idade." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
+
+<!-- ═══════════════════════════════════════════════════════════════
+     META PIXEL — Integração Completa
+     Pixel: 2052257468753276
+     Versão: 5.0 — Pixel + Conversions API (CAPI) — 1 Pixel
+     Todos os eventos: PageView, ViewContent, Lead, AddToCart,
+     InitiateCheckout, AddPaymentInfo, Purchase, CompleteRegistration,
+     Contact, Subscribe
+     Deduplicação por eventID + guardas once-per-action
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+/* ──────────────────────────────────────────────
+   1. CARREGAMENTO DO SDK DO META PIXEL
+   ────────────────────────────────────────────── */
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+
+/* ──────────────────────────────────────────────
+   2. INICIALIZAÇÃO DOS PIXELS
+   ────────────────────────────────────────────── */
+fbq('init','2052257468753276',{},{
+  access_token:'EAAPoNOQSPoEBSh5uZABZA2ZAgAmoeNEnDaPGFXocYO1ZBqYyBAdRVgQqnH8jAoDGhWJxU7mwwGsM53EPlOjfinw9AavnKd9Fgu56a4awQBQZAM8qauYC2EYAVJ3F67YxZBMDFFk9MZClUVO3xVuPRQ96tYbeYUdf9xQsp9D7qjJrjicHaqT1PWq9YcxrvZCzkGlj9gZDZD'
+});
+
+/* ──────────────────────────────────────────────
+   3. UTILITÁRIOS — Deduplicação & Guardas
+   ────────────────────────────────────────────── */
+(function(){
+  'use strict';
+
+  /** Gera um UUID v4 para servir de eventID (deduplicação browser ↔ CAPI) */
+  function generateEventID(){
+    if(typeof crypto!=='undefined'&&crypto.randomUUID){
+      return crypto.randomUUID();
+    }
+    // Fallback para navegadores mais antigos
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){
+      var r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);
+      return v.toString(16);
+    });
+  }
+
+  /** Registro de eventos já disparados — impede duplicatas na mesma sessão */
+  var _firedEvents={};
+
+  /**
+   * Dispara um evento padrão do Meta Pixel UMA ÚNICA VEZ por chave.
+   * @param {string} eventName  Nome do evento (PageView, Lead, etc.)
+   * @param {Object} [params]   Parâmetros do evento
+   * @param {string} [key]      Chave de deduplicação (default = eventName)
+   */
+  function trackOnce(eventName,params,key){
+    var k=key||eventName;
+    if(_firedEvents[k])return;
+    _firedEvents[k]=true;
+    var eid=generateEventID();
+    fbq('track',eventName,params||{},{eventID:eid});
+  }
+
+  /**
+   * Dispara um evento customizado do Meta Pixel UMA ÚNICA VEZ por chave.
+   */
+  function trackCustomOnce(eventName,params,key){
+    var k=key||eventName;
+    if(_firedEvents[k])return;
+    _firedEvents[k]=true;
+    var eid=generateEventID();
+    fbq('trackCustom',eventName,params||{},{eventID:eid});
+  }
+
+  /* ──────────────────────────────────────────────
+     4. EVENTOS PADRÃO — Disparo Automático
+     ────────────────────────────────────────────── */
+
+  /** 4.1 PageView — dispara imediatamente no carregamento */
+  trackOnce('PageView');
+
+  /** 4.2 ViewContent — informações da página atual */
+  trackOnce('ViewContent',{
+    content_name: document.title,
+    content_category: 'landing_page',
+    content_type: 'product',
+    content_ids: [window.location.pathname]
+  });
+
+  /** 4.3 Lead — dispara quando o usuário visualiza a seção CTA */
+  function initLeadTracking(){
+    if(!('IntersectionObserver' in window))return;
+    var observer=new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          trackOnce('Lead',{
+            content_name: 'CTA Section Visible',
+            content_category: 'landing_page'
+          });
+          observer.disconnect();
+        }
+      });
+    },{threshold:0.5});
+
+    var cta=document.querySelector('.cta-text, .sub');
+    if(cta){
+      observer.observe(cta);
+    }else{
+      document.addEventListener('DOMContentLoaded',function(){
+        var ctaEl=document.querySelector('.cta-text, .sub');
+        if(ctaEl)observer.observe(ctaEl);
+      });
+    }
+  }
+  initLeadTracking();
+
+  /** 4.4 InitiateCheckout — dispara no clique em links externos / botões CTA */
+  document.addEventListener('click',function(e){
+    var el=e.target.closest('a[href],button,[role="button"]');
+    if(!el)return;
+    var href=el.href||'';
+    var isExternal=href&&href.indexOf(location.hostname)===-1&&href.indexOf('http')===0;
+    var isCTA=el.closest('.cta-text, .sub')||
+              el.classList.contains('cta')||
+              el.hasAttribute('data-checkout');
+
+    if(isExternal||isCTA){
+      trackOnce('InitiateCheckout',{
+        content_name: (el.innerText||'').substring(0,100),
+        content_category: 'landing_page',
+        content_ids: [href]
+      },'InitiateCheckout_'+href);
+    }
+  });
+
+  /* ──────────────────────────────────────────────
+     5. EVENTOS TRANSACIONAIS — Funções Auxiliares
+        (Chamadas manualmente em páginas de carrinho/confirmação)
+     ────────────────────────────────────────────── */
+
+  /**
+   * 5.1 AddToCart — chamar quando o usuário adicionar um item ao carrinho
+   * @param {Object} data
+   * @param {string}   data.content_name  Nome do produto
+   * @param {string}   data.content_id    ID do produto
+   * @param {string}   data.content_type  Tipo (ex.: 'product')
+   * @param {number}   data.value         Valor do item
+   * @param {string}   data.currency      Moeda (ex.: 'BRL')
+   */
+  window.fbTrackAddToCart=function(data){
+    data=data||{};
+    var key='AddToCart_'+(data.content_id||data.content_name||'default');
+    trackOnce('AddToCart',{
+      content_name:  data.content_name  || '',
+      content_ids:   [data.content_id   || ''],
+      content_type:  data.content_type  || 'product',
+      value:         data.value         || 0,
+      currency:      data.currency      || 'BRL'
+    },key);
+  };
+
+  /**
+   * 5.2 Purchase — chamar na página de confirmação de compra
+   * @param {Object} data
+   * @param {string}   data.content_name  Nome do produto
+   * @param {string}   data.content_id    ID do produto
+   * @param {string}   data.content_type  Tipo (ex.: 'product')
+   * @param {number}   data.value         Valor total da compra  ★ OBRIGATÓRIO
+   * @param {string}   data.currency      Moeda (ex.: 'BRL')     ★ OBRIGATÓRIO
+   * @param {number}   [data.num_items]   Quantidade de itens
+   */
+  window.fbTrackPurchase=function(data){
+    data=data||{};
+    var key='Purchase_'+(data.content_id||data.content_name||Date.now());
+    trackOnce('Purchase',{
+      content_name:  data.content_name  || '',
+      content_ids:   [data.content_id   || ''],
+      content_type:  data.content_type  || 'product',
+      value:         data.value         || 0,
+      currency:      data.currency      || 'BRL',
+      num_items:     data.num_items     || 1
+    },key);
+  };
+
+  /**
+   * 5.3 AddPaymentInfo — chamar quando o usuário adicionar dados de pagamento
+   * @param {Object} data
+   * @param {string}   data.content_name   Nome do produto / plano
+   * @param {string}   data.content_id     ID do produto
+   * @param {number}   data.value          Valor
+   * @param {string}   data.currency       Moeda (ex.: 'BRL')
+   */
+  window.fbTrackAddPaymentInfo=function(data){
+    data=data||{};
+    var key='AddPaymentInfo_'+(data.content_id||data.content_name||'default');
+    trackOnce('AddPaymentInfo',{
+      content_name:  data.content_name  || '',
+      content_ids:   [data.content_id   || ''],
+      content_category: data.content_category || 'payment',
+      value:         data.value         || 0,
+      currency:      data.currency      || 'BRL'
+    },key);
+  };
+
+  /**
+   * 5.4 CompleteRegistration — chamar quando o usuário completar um registro
+   * @param {Object} data
+   * @param {string}   data.content_name  Nome do formulário / registro
+   * @param {string}   data.status        Status (ex.: 'completed')
+   * @param {number}   data.value         Valor atribuído ao registro
+   * @param {string}   data.currency      Moeda (ex.: 'BRL')
+   */
+  window.fbTrackCompleteRegistration=function(data){
+    data=data||{};
+    var key='CompleteRegistration_'+(data.content_name||'default');
+    trackOnce('CompleteRegistration',{
+      content_name:  data.content_name  || '',
+      status:        data.status        || 'completed',
+      value:         data.value         || 0,
+      currency:      data.currency      || 'BRL'
+    },key);
+  };
+
+  /**
+   * 5.5 Contact — chamar quando o usuário iniciar contato
+   * @param {Object} data
+   * @param {string}   data.content_name  Método de contato (whatsapp, email, etc.)
+   * @param {string}   data.content_category  Categoria
+   */
+  window.fbTrackContact=function(data){
+    data=data||{};
+    var key='Contact_'+(data.content_name||'default');
+    trackOnce('Contact',{
+      content_name:     data.content_name     || '',
+      content_category: data.content_category || 'contact'
+    },key);
+  };
+
+  /**
+   * 5.6 Subscribe — chamar quando o usuário assinar um plano / newsletter
+   * @param {Object} data
+   * @param {string}   data.content_name  Nome do plano / assinatura
+   * @param {string}   data.content_id    ID do plano
+   * @param {number}   data.value         Valor da assinatura
+   * @param {string}   data.currency      Moeda (ex.: 'BRL')
+   * @param {string}   data.predicted_ltv LTV previsto (opcional)
+   */
+  window.fbTrackSubscribe=function(data){
+    data=data||{};
+    var key='Subscribe_'+(data.content_id||data.content_name||'default');
+    trackOnce('Subscribe',{
+      content_name:  data.content_name  || '',
+      content_ids:   [data.content_id   || ''],
+      value:         data.value         || 0,
+      currency:      data.currency      || 'BRL',
+      predicted_ltv: data.predicted_ltv || 0
+    },key);
+  };
+
+  /* ──────────────────────────────────────────────
+     6. TRACKING AVANÇADO (Eventos Customizados)
+     ────────────────────────────────────────────── */
+
+  /** 6.1 Scroll Depth (25%, 50%, 75%, 100%) */
+  (function(){
+    var scrollFired={};
+    window.addEventListener('scroll',function(){
+      var h=document.documentElement,b=document.body;
+      var st=h.scrollTop||b.scrollTop;
+      var sh=(h.scrollHeight||b.scrollHeight)-h.clientHeight;
+      if(sh<=0)return;
+      var pct=Math.round(st/sh*100);
+      [25,50,75,100].forEach(function(m){
+        if(pct>=m&&!scrollFired[m]){
+          scrollFired[m]=true;
+          trackCustomOnce('ScrollDepth',{percent:m},'ScrollDepth_'+m);
+        }
+      });
+    },{passive:true});
+  })();
+
+  /** 6.2 Tempo na página (30s, 60s, 120s) */
+  [30,60,120].forEach(function(sec){
+    setTimeout(function(){
+      trackCustomOnce('TimeOnPage',{seconds:sec},'TimeOnPage_'+sec);
+    },sec*1000);
+  });
+
+  /** 6.3 Cliques em qualquer link ou botão */
+  document.addEventListener('click',function(e){
+    var el=e.target.closest('a,button,[role="button"]');
+    if(el){
+      var eid=generateEventID();
+      fbq('trackCustom','ElementClick',{
+        tag:el.tagName,
+        text:(el.innerText||'').substring(0,100),
+        href:el.href||''
+      },{eventID:eid});
+    }
+  });
+
+  /** 6.4 Saída da página (beforeunload) */
+  window.addEventListener('beforeunload',function(){
+    var eid=generateEventID();
+    fbq('trackCustom','PageExit',{
+      timeSpent:Math.round(performance.now()/1000)
+    },{eventID:eid});
+  });
+
+  /* ──────────────────────────────────────────────
+     7. AUTO-DETECÇÃO VIA QUERY STRING
+        Dispara eventos automaticamente se a URL contiver
+        parâmetros correspondentes.
+
+        Exemplos:
+        ?purchase=1&value=97&currency=BRL
+        ?event=addpaymentinfo&value=97&currency=BRL
+        ?event=completeregistration
+        ?event=contact&method=whatsapp
+        ?event=subscribe&value=29.90&currency=BRL
+     ────────────────────────────────────────────── */
+  (function(){
+    var params=new URLSearchParams(window.location.search);
+    var ev=(params.get('event')||'').toLowerCase();
+
+    /* Purchase */
+    if(params.get('purchase')==='1'||ev==='purchase'){
+      window.fbTrackPurchase({
+        content_name: params.get('product')   || document.title,
+        content_id:   params.get('product_id')|| '',
+        value:        parseFloat(params.get('value'))||0,
+        currency:     params.get('currency')  || 'BRL',
+        num_items:    parseInt(params.get('qty'),10)||1
+      });
+    }
+
+    /* AddPaymentInfo */
+    if(ev==='addpaymentinfo'){
+      window.fbTrackAddPaymentInfo({
+        content_name: params.get('product')   || document.title,
+        content_id:   params.get('product_id')|| '',
+        value:        parseFloat(params.get('value'))||0,
+        currency:     params.get('currency')  || 'BRL'
+      });
+    }
+
+    /* CompleteRegistration */
+    if(ev==='completeregistration'){
+      window.fbTrackCompleteRegistration({
+        content_name: params.get('form')   || 'registration',
+        status:       params.get('status') || 'completed',
+        value:        parseFloat(params.get('value'))||0,
+        currency:     params.get('currency')|| 'BRL'
+      });
+    }
+
+    /* Contact */
+    if(ev==='contact'){
+      window.fbTrackContact({
+        content_name:     params.get('method')   || 'general',
+        content_category: params.get('category') || 'contact'
+      });
+    }
+
+    /* Subscribe */
+    if(ev==='subscribe'){
+      window.fbTrackSubscribe({
+        content_name: params.get('plan')       || 'subscription',
+        content_id:   params.get('plan_id')    || '',
+        value:        parseFloat(params.get('value'))||0,
+        currency:     params.get('currency')   || 'BRL'
+      });
+    }
+  })();
+
+  /* ──────────────────────────────────────────────
+     8. AUTO-DETECT CONTACT LINKS
+        Dispara Contact em cliques em links de WhatsApp,
+        Telegram, mailto:, tel:, etc.
+     ────────────────────────────────────────────── */
+  document.addEventListener('click',function(e){
+    var el=e.target.closest('a[href]');
+    if(!el)return;
+    var href=(el.href||'').toLowerCase();
+    var method=null;
+    if(href.indexOf('wa.me')!==-1||href.indexOf('whatsapp')!==-1) method='whatsapp';
+    else if(href.indexOf('t.me')!==-1||href.indexOf('telegram')!==-1) method='telegram';
+    else if(href.indexOf('mailto:')===0) method='email';
+    else if(href.indexOf('tel:')===0) method='phone';
+    if(method){
+      window.fbTrackContact({
+        content_name: method,
+        content_category: 'contact_link'
+      });
+    }
+  });
+
+})();
+</script>
+
+<!-- noscript fallback -->
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=2052257468753276&ev=PageView&noscript=1"/></noscript>
+
+<!-- SmartPlayer SDK -->
+<script type="text/javascript"> var s=document.createElement("script"); s.src="https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js", s.async=!0,document.head.appendChild(s); </script>
+
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#000;color:#fff;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body{min-height:100vh}
+  .page{position:relative;width:100%;max-width:420px;min-height:100vh;margin:0 auto;padding:44px 20px 84px;background:radial-gradient(ellipse 120% 55% at 50% 0%,#2a0a0a 0%,#0a0a0a 55%,#070707 100%);background-color:#0a0a0a;display:flex;flex-direction:column;align-items:center;gap:14px;overflow:hidden}
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.35;background-image:radial-gradient(circle,#fff 0,#fff .5px,transparent .5px);background-size:3px 3px}
+  .edge-dot{position:fixed;top:26px;width:4px;height:4px;border-radius:50%;background:#ff2b2b;opacity:.8;z-index:51}
+  .edge-dot.l{left:max(14px,calc(50% - 210px + 14px))}
+  .edge-dot.r{right:max(14px,calc(50% - 210px + 14px))}
+  .topline{display:flex;align-items:center;justify-content:center;gap:10px;text-align:center;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#ff3b3b}
+  .blink{position:relative;width:8px;height:8px;border-radius:50%;background:#ff2b2b;flex:none;animation:blink 1s steps(1,end) infinite}
+  .blink::after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;box-shadow:0 0 0 0 rgba(255,43,43,.6);border:1px solid rgba(255,43,43,.7);animation:ring 1.6s ease-out infinite}
+  @keyframes blink{0%{opacity:1}50%{opacity:.12}100%{opacity:.12}}
+  @keyframes ring{0%{transform:scale(1);opacity:.9}100%{transform:scale(3.4);opacity:0}}
+  h1{font-family:'Playfair Display',serif;font-weight:900;font-size:28px;line-height:1.08;letter-spacing:-.5px;text-align:center;color:#fff}
+  h1 em{font-style:italic;color:#ff3b3b}
+  .vsl{position:relative;width:100%;border-radius:16px;border:1px solid rgba(255,59,59,.55);overflow:hidden;background:#0c0606;box-shadow:0 0 38px rgba(255,43,43,.28),0 0 90px rgba(255,43,43,.12)}
+  .tag{position:absolute;top:12px;left:12px;z-index:2;pointer-events:none;background:#ff2b2b;color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border-radius:4px}
+  .pill{position:absolute;right:12px;bottom:12px;z-index:2;pointer-events:none;background:#000;color:#fff;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px}
+  .sub{font-size:12.5px;line-height:1.55;color:#c2c2c2;text-align:center;max-width:320px}
+  .sub b{color:#fff;font-weight:600}
+  .proof{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;font-size:11px;color:#c2c2c2;text-align:center}
+  .proof .stars{color:#ffb347;letter-spacing:2px;font-size:11px}
+  .proof b{color:#fff;font-weight:700}
+  .micro{font-size:10.5px;color:#9a9a9a;text-align:center}
+  .micro b{color:#ff6b6b;font-weight:600}
+  .seal{display:flex;align-items:center;justify-content:center;gap:8px;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#ff6b6b;text-align:center}
+  .seal i{display:flex;align-items:center;justify-content:center;width:16px;height:16px;border:1.5px solid #ff2b2b;border-radius:50%;font-style:normal;font-size:9px;font-weight:700;color:#ff6b6b;flex:none}
+  .bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;z-index:60;background:rgba(10,10,10,.92);border-top:1px solid #1d1d1d;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 16px;font-size:11px;color:#9a9a9a}
+  .bar #cd{color:#ff3b3b;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="edge-dot l"></div>
+<div class="edge-dot r"></div>
+<div class="page">
+  <div class="topline"><span class="blink"></span><span>NÃO SAIA DESSA PÁGINA</span></div>
+  <h1>Trancamos a porta<br>e deixamos a<br><em>câmera ligada</em></h1>
+  <div class="vsl">
+    <div id="ifr_6acabc7f339923f1ce4aef25_wrapper" style="margin: 0 auto; width: 100%; max-width: 400px;">
+      <div style="position: relative; padding: 177.22222222222223% 0 0 0;" id="ifr_6acabc7f339923f1ce4aef25_aspect">
+        <iframe frameborder="0" allowfullscreen src="about:blank"
+          id="ifr_6acabc7f339923f1ce4aef25"
+          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+          referrerpolicy="origin"
+          onload="this.onload=null, this.src='https://scripts.converteai.net/bd3a827e-f332-428a-b271-67748699bf55/players/6acabc7f339923f1ce4aef25/v4/embed.html'+(location.search||'?')+'&vl='+encodeURIComponent(location.href)"></iframe>
+      </div>
+    </div>
+    <div class="tag">NOVO HOJE</div>
+    <div class="pill">02:47</div>
+  </div>
+  <p class="sub">Eu e as minhas quatro amigas gravamos tudo. <b>Só o que a gente faz quando ninguém está vendo.</b></p>
+  <div class="proof"><span class="stars">★★★★★</span><span><b>+1300</b> assinantes</span><span><b>+4</b> vagas hoje</span></div>
+  <p class="micro">Libero o acesso em 30 minutos · <b>acesso via PIX</b></p>
+  <div class="seal"><i>18</i><span>CONTEÚDO ADULTO · MAIORIDADE</span></div>
+</div>
+<div class="bar"><span>O vídeo sai do ar em</span><span id="cd">03:00</span></div>
+<script>
+(function(){
+  var t=180,el=document.getElementById('cd');
+  function p(n){return n<10?'0'+n:''+n}
+  function r(){el.textContent=p(Math.floor(t/60))+':'+p(t%60)}
+  r();
+  var i=setInterval(function(){
+    if(t>0){t--;r()}
+    if(t<=0){clearInterval(i)}
+  },1000);
+})();
+</script>
+</body>
+</html>
