@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Não saia dessa página</title>
 <meta name="description" content="Conteúdo exclusivo +18. Acesso restrito a maiores de idade." />
 <meta name="robots" content="noindex,nofollow" />
@@ -424,32 +424,32 @@ src="https://www.facebook.com/tr?id=2052257468753276&ev=PageView&noscript=1"/></
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{background:#000;color:#fff;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   body{min-height:100vh}
-  .page{position:relative;width:100%;max-width:420px;min-height:100vh;margin:0 auto;padding:44px 20px 84px;background:radial-gradient(ellipse 120% 55% at 50% 0%,#2a0a0a 0%,#0a0a0a 55%,#070707 100%);background-color:#0a0a0a;display:flex;flex-direction:column;align-items:center;gap:14px;overflow:hidden}
-  .grain{position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.35;background-image:radial-gradient(circle,#fff 0,#fff .5px,transparent .5px);background-size:3px 3px}
-  .edge-dot{position:fixed;top:26px;width:4px;height:4px;border-radius:50%;background:#ff2b2b;opacity:.8;z-index:51}
-  .edge-dot.l{left:max(14px,calc(50% - 210px + 14px))}
-  .edge-dot.r{right:max(14px,calc(50% - 210px + 14px))}
-  .topline{display:flex;align-items:center;justify-content:center;gap:10px;text-align:center;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#ff3b3b}
-  .blink{position:relative;width:8px;height:8px;border-radius:50%;background:#ff2b2b;flex:none;animation:blink 1s steps(1,end) infinite}
-  .blink::after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;box-shadow:0 0 0 0 rgba(255,43,43,.6);border:1px solid rgba(255,43,43,.7);animation:ring 1.6s ease-out infinite}
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.35;background-image:radial-gradient(circle,#fff 0,#fff .5px,transparent .5px);background-size:3px 3px}
+  .edge-dot{position:fixed;top:26px;width:4px;height:4px;border-radius:50%;background:#ff2b2b;opacity:.8;pointer-events:none;z-index:1}
+  .edge-dot.l{left:max(14px,calc(50% - 240px + 14px))}
+  .edge-dot.r{right:max(14px,calc(50% - 240px + 14px))}
+  .page{width:100%;max-width:480px;min-height:100vh;margin:0 auto;padding:clamp(28px,8vw,44px) clamp(16px,5vw,20px) calc(88px + env(safe-area-inset-bottom));background:radial-gradient(ellipse 120% 55% at 50% 0%,#2a0a0a 0%,#0a0a0a 55%,#070707 100%);background-color:#0a0a0a;display:flex;flex-direction:column;align-items:center;gap:clamp(14px,4vw,18px);overflow:hidden}
+  .topline{position:relative;z-index:3;display:flex;align-items:center;justify-content:center;gap:10px;text-align:center;font-size:clamp(12px,3.2vw,13px);font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#ff5a5a;text-shadow:0 1px 10px rgba(0,0,0,.95),0 0 2px rgba(0,0,0,.95)}
+  .blink{position:relative;width:9px;height:9px;border-radius:50%;background:#ff2b2b;flex:none;animation:blink 1s steps(1,end) infinite}
+  .blink::after{content:"";position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;box-shadow:0 0 0 0 rgba(255,43,43,.6);border:1px solid rgba(255,43,43,.7);animation:ring 1.6s ease-out infinite}
   @keyframes blink{0%{opacity:1}50%{opacity:.12}100%{opacity:.12}}
   @keyframes ring{0%{transform:scale(1);opacity:.9}100%{transform:scale(3.4);opacity:0}}
-  h1{font-family:'Playfair Display',serif;font-weight:900;font-size:28px;line-height:1.08;letter-spacing:-.5px;text-align:center;color:#fff}
-  h1 em{font-style:italic;color:#ff3b3b}
-  .vsl{position:relative;width:100%;border-radius:16px;border:1px solid rgba(255,59,59,.55);overflow:hidden;background:#0c0606;box-shadow:0 0 38px rgba(255,43,43,.28),0 0 90px rgba(255,43,43,.12)}
-  .tag{position:absolute;top:12px;left:12px;z-index:2;pointer-events:none;background:#ff2b2b;color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border-radius:4px}
-  .pill{position:absolute;right:12px;bottom:12px;z-index:2;pointer-events:none;background:#000;color:#fff;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px}
-  .sub{font-size:12.5px;line-height:1.55;color:#c2c2c2;text-align:center;max-width:320px}
+  h1{position:relative;z-index:3;font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(32px,9vw,44px);line-height:1.08;letter-spacing:-.5px;text-align:center;color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.95),0 0 2px rgba(0,0,0,.95)}
+  h1 em{font-style:italic;color:#ff5a5a}
+  .vsl{position:relative;z-index:3;width:100%;margin:0 auto;padding:0;border-radius:16px;border:1px solid rgba(255,59,59,.55);overflow:hidden;background:#0c0606;box-shadow:0 0 38px rgba(255,43,43,.28),0 0 90px rgba(255,43,43,.12)}
+  .vsl > [id$="_wrapper"]{width:100% !important;max-width:none !important;margin:0 !important}
+  .vsl iframe{display:block;border:0;width:100%;height:100%;border-radius:15px}
+  .tag{position:absolute;top:12px;left:12px;z-index:2;pointer-events:none;background:#ff2b2b;color:#fff;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:4px}
+  .pill{position:absolute;right:12px;bottom:12px;z-index:2;pointer-events:none;background:#000;color:#fff;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px}
+  .sub{position:relative;z-index:3;font-size:clamp(15px,4.2vw,18px);font-weight:500;line-height:1.6;color:#e6e6e6;text-align:center;max-width:400px;text-shadow:0 1px 10px rgba(0,0,0,.95),0 0 2px rgba(0,0,0,.95)}
   .sub b{color:#fff;font-weight:600}
-  .proof{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;font-size:11px;color:#c2c2c2;text-align:center}
-  .proof .stars{color:#ffb347;letter-spacing:2px;font-size:11px}
+  .proof{position:relative;z-index:3;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px 14px;font-size:clamp(14px,3.8vw,15px);font-weight:500;color:#e6e6e6;text-align:center;text-shadow:0 1px 10px rgba(0,0,0,.95),0 0 2px rgba(0,0,0,.95)}
+  .proof .stars{color:#ffb347;letter-spacing:2px;font-size:clamp(14px,3.8vw,15px)}
   .proof b{color:#fff;font-weight:700}
-  .micro{font-size:10.5px;color:#9a9a9a;text-align:center}
-  .micro b{color:#ff6b6b;font-weight:600}
-  .seal{display:flex;align-items:center;justify-content:center;gap:8px;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#ff6b6b;text-align:center}
-  .seal i{display:flex;align-items:center;justify-content:center;width:16px;height:16px;border:1.5px solid #ff2b2b;border-radius:50%;font-style:normal;font-size:9px;font-weight:700;color:#ff6b6b;flex:none}
-  .bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;z-index:60;background:rgba(10,10,10,.92);border-top:1px solid #1d1d1d;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 16px;font-size:11px;color:#9a9a9a}
-  .bar #cd{color:#ff3b3b;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+  .seal{position:relative;z-index:3;display:flex;align-items:center;justify-content:center;gap:8px;font-size:clamp(11px,3vw,12px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#ff5a5a;text-align:center;text-shadow:0 1px 10px rgba(0,0,0,.95),0 0 2px rgba(0,0,0,.95)}
+  .seal i{display:flex;align-items:center;justify-content:center;width:20px;height:20px;border:1.5px solid #ff3b3b;border-radius:50%;font-style:normal;font-size:10.5px;font-weight:700;color:#ff5a5a;flex:none}
+  .bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:10;background:rgba(10,10,10,.96);border-top:1px solid #262626;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 16px calc(14px + env(safe-area-inset-bottom));font-size:13px;font-weight:500;color:#e6e6e6;text-shadow:0 1px 10px rgba(0,0,0,.95),0 0 2px rgba(0,0,0,.95)}
+  .bar #cd{color:#ff5a5a;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 </style>
 </head>
 <body>
@@ -460,13 +460,13 @@ src="https://www.facebook.com/tr?id=2052257468753276&ev=PageView&noscript=1"/></
   <div class="topline"><span class="blink"></span><span>NÃO SAIA DESSA PÁGINA</span></div>
   <h1>Trancamos a porta<br>e deixamos a<br><em>câmera ligada</em></h1>
   <div class="vsl">
-    <div id="ifr_6acabc7f339923f1ce4aef25_wrapper" style="margin: 0 auto; width: 100%; max-width: 400px;">
-      <div style="position: relative; padding: 177.22222222222223% 0 0 0;" id="ifr_6acabc7f339923f1ce4aef25_aspect">
+    <div id="ifr_6b01c5a5f3f97f756ae2f5b1_wrapper" style="margin: 0 auto; width: 100%;">
+      <div style="position: relative; padding: 177.22222222222223% 0 0 0;" id="ifr_6b01c5a5f3f97f756ae2f5b1_aspect">
         <iframe frameborder="0" allowfullscreen src="about:blank"
-          id="ifr_6acabc7f339923f1ce4aef25"
+          id="ifr_6b01c5a5f3f97f756ae2f5b1"
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
           referrerpolicy="origin"
-          onload="this.onload=null, this.src='https://scripts.converteai.net/bd3a827e-f332-428a-b271-67748699bf55/players/6acabc7f339923f1ce4aef25/v4/embed.html'+(location.search||'?')+'&vl='+encodeURIComponent(location.href)"></iframe>
+          onload=" this.onload=null, this.src='https://scripts.converteai.net/6d58978f-8af7-41f2-bb7b-7e72f9865f1d/players/6b01c5a5f3f97f756ae2f5b1/v4/embed.html' +(location.search||'?') +'&vl=' +encodeURIComponent(location.href)"></iframe>
       </div>
     </div>
     <div class="tag">NOVO HOJE</div>
@@ -474,7 +474,6 @@ src="https://www.facebook.com/tr?id=2052257468753276&ev=PageView&noscript=1"/></
   </div>
   <p class="sub">Eu e as minhas quatro amigas gravamos tudo. <b>Só o que a gente faz quando ninguém está vendo.</b></p>
   <div class="proof"><span class="stars">★★★★★</span><span><b>+1300</b> assinantes</span><span><b>+4</b> vagas hoje</span></div>
-  <p class="micro">Libero o acesso em 30 minutos · <b>acesso via PIX</b></p>
   <div class="seal"><i>18</i><span>CONTEÚDO ADULTO · MAIORIDADE</span></div>
 </div>
 <div class="bar"><span>O vídeo sai do ar em</span><span id="cd">03:00</span></div>
