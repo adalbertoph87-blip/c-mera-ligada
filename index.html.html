@@ -16,17 +16,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
 
 <!-- ═══════════════════════════════════════════════════════════════
-     META PIXEL — Integração Completa
-     Pixel: 2052257468753276
-     Versão: 5.0 — Pixel + Conversions API (CAPI) — 1 Pixel
+     META PIXEL + CONVERSIONS API (CAPI) — Integração Completa
+     Pixel ID: 1691528462498284
+     Versão: 6.0 — Pixel (Browser) + Conversions API (CAPI)
      Todos os eventos: PageView, ViewContent, Lead, AddToCart,
      InitiateCheckout, AddPaymentInfo, Purchase, CompleteRegistration,
-     Contact, Subscribe
-     Deduplicação por eventID + guardas once-per-action
+     Contact, Subscribe + ScrollDepth, TimeOnPage, ElementClick, PageExit
+     Deduplicação por eventID + cookies _fbp/_fbc + guardas once-per-action
      ═══════════════════════════════════════════════════════════════ -->
 <script>
 /* ──────────────────────────────────────────────
-   1. CARREGAMENTO DO SDK DO META PIXEL
+   1. CONFIGURAÇÃO DO PIXEL E CONVERSIONS API
+   ────────────────────────────────────────────── */
+var FB_PIXEL_ID='1691528462498284';
+var FB_CAPI_TOKEN='EAAQFJEOxH6wBTO6EYnld01shIoM4PFeSZB0XB1hVpSuhfYoTd5eIajJMZAaoCuZAIgnZBrJizYRYH0za6ZCkrUb8ZB3hCMzAnt5FA9lUruTjU5jpwN09OFkctnwI9sGYU0mFsvTU2IYZASSPwusr0C9gJSJtsKh8ubxUSPL0BjyAwZCswH03koEUDvcesrB5NB54JgZDZD';
+var FB_API_VERSION='v27.0';
+
+/* ──────────────────────────────────────────────
+   2. CARREGAMENTO DO SDK DO META PIXEL
    ────────────────────────────────────────────── */
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
@@ -35,17 +42,67 @@ t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
 document,'script','https://connect.facebook.net/en_US/fbevents.js');
 
 /* ──────────────────────────────────────────────
-   2. INICIALIZAÇÃO DOS PIXELS
-   ────────────────────────────────────────────── */
-fbq('init','2052257468753276',{},{
-  access_token:'EAAPoNOQSPoEBSh5uZABZA2ZAgAmoeNEnDaPGFXocYO1ZBqYyBAdRVgQqnH8jAoDGhWJxU7mwwGsM53EPlOjfinw9AavnKd9Fgu56a4awQBQZAM8qauYC2EYAVJ3F67YxZBMDFFk9MZClUVO3xVuPRQ96tYbeYUdf9xQsp9D7qjJrjicHaqT1PWq9YcxrvZCzkGlj9gZDZD'
-});
-
-/* ──────────────────────────────────────────────
-   3. UTILITÁRIOS — Deduplicação & Guardas
+   3. UTILITÁRIOS — Cookies (_fbp/_fbc), Deduplicação & CAPI
    ────────────────────────────────────────────── */
 (function(){
   'use strict';
+
+  var _cachedFbp='';
+  var _cachedFbc='';
+
+  function getCookie(name){
+    try{
+      var match=document.cookie.match(new RegExp('(?:^|; )'+name.replace(/([.$?*|{}()[\]\\/+^])/g,'\\$1')+'=([^;]*)'));
+      return match?decodeURIComponent(match[1]):'';
+    }catch(e){
+      return '';
+    }
+  }
+
+  function setCookie(name,value,days){
+    try{
+      var expires='';
+      if(days){
+        var d=new Date();
+        d.setTime(d.getTime()+(days*864e5));
+        expires='; expires='+d.toUTCString();
+      }
+      document.cookie=name+'='+encodeURIComponent(value)+expires+'; path=/; SameSite=Lax';
+    }catch(e){}
+  }
+
+  function getOrCreateFbp(){
+    var fbp=getCookie('_fbp')||_cachedFbp;
+    if(!fbp){
+      fbp='fb.1.'+Date.now()+'.'+Math.floor(1e9+Math.random()*9e9);
+      setCookie('_fbp',fbp,90);
+    }
+    _cachedFbp=fbp;
+    return fbp;
+  }
+
+  function getOrCreateFbc(){
+    var fbc=getCookie('_fbc')||_cachedFbc;
+    if(!fbc){
+      try{
+        var params=new URLSearchParams(window.location.search);
+        var fbclid=params.get('fbclid');
+        if(fbclid){
+          fbc='fb.1.'+Date.now()+'.'+fbclid;
+          setCookie('_fbc',fbc,90);
+        }
+      }catch(e){}
+    }
+    _cachedFbc=fbc;
+    return fbc;
+  }
+
+  // Inicializa _fbp e _fbc antes do SDK para garantir match entre Pixel e CAPI
+  getOrCreateFbp();
+  getOrCreateFbc();
+
+  // Inicialização do Meta Pixel no navegador
+  fbq('init',FB_PIXEL_ID);
 
   /** Gera um UUID v4 para servir de eventID (deduplicação browser ↔ CAPI) */
   function generateEventID(){
@@ -59,11 +116,85 @@ fbq('init','2052257468753276',{},{
     });
   }
 
+  function cleanParams(params){
+    var out={};
+    if(!params||typeof params!=='object')return out;
+    Object.keys(params).forEach(function(k){
+      var v=params[k];
+      if(v!==undefined&&v!==null&&v!==''){
+        out[k]=v;
+      }
+    });
+    return out;
+  }
+
+  function getTestEventCode(){
+    try{
+      return new URLSearchParams(window.location.search).get('fb_test_code')||'';
+    }catch(e){
+      return '';
+    }
+  }
+
+  /**
+   * Envia o mesmo evento para a Meta Conversions API (CAPI)
+   * com o mesmo event_id para deduplicação automática no Events Manager.
+   */
+  function sendCAPI(eventName,params,eventID){
+    if(!FB_PIXEL_ID||!FB_CAPI_TOKEN||typeof fetch!=='function')return;
+    try{
+      var userData={
+        client_user_agent: navigator.userAgent||''
+      };
+      var fbp=getOrCreateFbp();
+      var fbc=getOrCreateFbc();
+      if(fbp)userData.fbp=fbp;
+      if(fbc)userData.fbc=fbc;
+
+      var eventObj={
+        event_name: eventName,
+        event_time: Math.floor(Date.now()/1000),
+        event_id: eventID,
+        event_source_url: window.location.href,
+        action_source: 'website',
+        user_data: userData
+      };
+
+      var cleaned=cleanParams(params);
+      if(Object.keys(cleaned).length>0){
+        eventObj.custom_data=cleaned;
+      }
+
+      var payload={data:[eventObj]};
+      var testCode=getTestEventCode();
+      if(testCode){
+        payload.test_event_code=testCode;
+      }
+
+      var endpoint='https://graph.facebook.com/'+FB_API_VERSION+'/'+FB_PIXEL_ID+'/events?access_token='+encodeURIComponent(FB_CAPI_TOKEN);
+      fetch(endpoint,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload),
+        keepalive:true
+      }).catch(function(){});
+    }catch(e){}
+  }
+
+  /** Dispara no Pixel (browser) e na Conversions API (CAPI) com o mesmo eventID */
+  function dispatchEvent(method,eventName,params){
+    var cleaned=cleanParams(params);
+    var eid=generateEventID();
+    fbq(method,eventName,cleaned,{eventID:eid});
+    sendCAPI(eventName,cleaned,eid);
+    return eid;
+  }
+
   /** Registro de eventos já disparados — impede duplicatas na mesma sessão */
   var _firedEvents={};
 
   /**
-   * Dispara um evento padrão do Meta Pixel UMA ÚNICA VEZ por chave.
+   * Dispara um evento padrão do Meta Pixel + CAPI UMA ÚNICA VEZ por chave.
    * @param {string} eventName  Nome do evento (PageView, Lead, etc.)
    * @param {Object} [params]   Parâmetros do evento
    * @param {string} [key]      Chave de deduplicação (default = eventName)
@@ -72,20 +203,23 @@ fbq('init','2052257468753276',{},{
     var k=key||eventName;
     if(_firedEvents[k])return;
     _firedEvents[k]=true;
-    var eid=generateEventID();
-    fbq('track',eventName,params||{},{eventID:eid});
+    dispatchEvent('track',eventName,params);
   }
 
   /**
-   * Dispara um evento customizado do Meta Pixel UMA ÚNICA VEZ por chave.
+   * Dispara um evento customizado do Meta Pixel + CAPI UMA ÚNICA VEZ por chave.
    */
   function trackCustomOnce(eventName,params,key){
     var k=key||eventName;
     if(_firedEvents[k])return;
     _firedEvents[k]=true;
-    var eid=generateEventID();
-    fbq('trackCustom',eventName,params||{},{eventID:eid});
+    dispatchEvent('trackCustom',eventName,params);
   }
+
+  /** Utilitário global para disparar qualquer evento (padrão ou customizado) no Pixel + CAPI */
+  window.fbTrackEvent=function(eventName,params,isCustom){
+    return dispatchEvent(isCustom?'trackCustom':'track',eventName,params);
+  };
 
   /* ──────────────────────────────────────────────
      4. EVENTOS PADRÃO — Disparo Automático
@@ -99,7 +233,7 @@ fbq('init','2052257468753276',{},{
     content_name: document.title,
     content_category: 'landing_page',
     content_type: 'product',
-    content_ids: [window.location.pathname]
+    content_ids: [window.location.pathname||'/']
   });
 
   /** 4.3 Lead — dispara quando o usuário visualiza a seção CTA */
@@ -141,10 +275,10 @@ fbq('init','2052257468753276',{},{
 
     if(isExternal||isCTA){
       trackOnce('InitiateCheckout',{
-        content_name: (el.innerText||'').substring(0,100),
+        content_name: (el.innerText||'').trim().substring(0,100),
         content_category: 'landing_page',
-        content_ids: [href]
-      },'InitiateCheckout_'+href);
+        content_ids: href?[href]:undefined
+      },'InitiateCheckout_'+(href||(el.innerText||'').trim()));
     }
   });
 
@@ -167,7 +301,7 @@ fbq('init','2052257468753276',{},{
     var key='AddToCart_'+(data.content_id||data.content_name||'default');
     trackOnce('AddToCart',{
       content_name:  data.content_name  || '',
-      content_ids:   [data.content_id   || ''],
+      content_ids:   data.content_id    ? [String(data.content_id)] : undefined,
       content_type:  data.content_type  || 'product',
       value:         data.value         || 0,
       currency:      data.currency      || 'BRL'
@@ -189,7 +323,7 @@ fbq('init','2052257468753276',{},{
     var key='Purchase_'+(data.content_id||data.content_name||Date.now());
     trackOnce('Purchase',{
       content_name:  data.content_name  || '',
-      content_ids:   [data.content_id   || ''],
+      content_ids:   data.content_id    ? [String(data.content_id)] : undefined,
       content_type:  data.content_type  || 'product',
       value:         data.value         || 0,
       currency:      data.currency      || 'BRL',
@@ -210,7 +344,7 @@ fbq('init','2052257468753276',{},{
     var key='AddPaymentInfo_'+(data.content_id||data.content_name||'default');
     trackOnce('AddPaymentInfo',{
       content_name:  data.content_name  || '',
-      content_ids:   [data.content_id   || ''],
+      content_ids:   data.content_id    ? [String(data.content_id)] : undefined,
       content_category: data.content_category || 'payment',
       value:         data.value         || 0,
       currency:      data.currency      || 'BRL'
@@ -265,7 +399,7 @@ fbq('init','2052257468753276',{},{
     var key='Subscribe_'+(data.content_id||data.content_name||'default');
     trackOnce('Subscribe',{
       content_name:  data.content_name  || '',
-      content_ids:   [data.content_id   || ''],
+      content_ids:   data.content_id    ? [String(data.content_id)] : undefined,
       value:         data.value         || 0,
       currency:      data.currency      || 'BRL',
       predicted_ltv: data.predicted_ltv || 0
@@ -305,22 +439,22 @@ fbq('init','2052257468753276',{},{
   document.addEventListener('click',function(e){
     var el=e.target.closest('a,button,[role="button"]');
     if(el){
-      var eid=generateEventID();
-      fbq('trackCustom','ElementClick',{
+      dispatchEvent('trackCustom','ElementClick',{
         tag:el.tagName,
-        text:(el.innerText||'').substring(0,100),
+        text:(el.innerText||'').trim().substring(0,100),
         href:el.href||''
-      },{eventID:eid});
+      });
     }
   });
 
-  /** 6.4 Saída da página (beforeunload) */
-  window.addEventListener('beforeunload',function(){
-    var eid=generateEventID();
-    fbq('trackCustom','PageExit',{
+  /** 6.4 Saída da página (pagehide + beforeunload com guarda única) */
+  function firePageExit(){
+    trackCustomOnce('PageExit',{
       timeSpent:Math.round(performance.now()/1000)
-    },{eventID:eid});
-  });
+    },'PageExit');
+  }
+  window.addEventListener('pagehide',firePageExit);
+  window.addEventListener('beforeunload',firePageExit);
 
   /* ──────────────────────────────────────────────
      7. AUTO-DETECÇÃO VIA QUERY STRING
@@ -333,6 +467,7 @@ fbq('init','2052257468753276',{},{
         ?event=completeregistration
         ?event=contact&method=whatsapp
         ?event=subscribe&value=29.90&currency=BRL
+        ?fb_test_code=TEST12345  (para testar CAPI no Events Manager)
      ────────────────────────────────────────────── */
   (function(){
     var params=new URLSearchParams(window.location.search);
@@ -415,7 +550,7 @@ fbq('init','2052257468753276',{},{
 
 <!-- noscript fallback -->
 <noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=2052257468753276&ev=PageView&noscript=1"/></noscript>
+src="https://www.facebook.com/tr?id=1691528462498284&ev=PageView&noscript=1"/></noscript>
 
 <!-- SmartPlayer SDK -->
 <script type="text/javascript"> var s=document.createElement("script"); s.src="https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js", s.async=!0,document.head.appendChild(s); </script>
